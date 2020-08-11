@@ -155,6 +155,29 @@ class PayUMoneyGateway implements PaymentGatewayInterface {
     {
         return substr(hash('sha256', mt_rand() . microtime()), 0, 20);
     }
+    
+    /**
+     * @param array $parameters
+     * @return false|mixed
+     */
+    public function verify(Array $parameters)
+    {
+        if(!isset($parameters['txnid'])){
+            return false;
+        }
+        $url = $this->getEndPointForPaymentVerification().'?merchantKey='.$this->merchantKey.'&merchantTransactionIds='.$parameters['txnid'];
+        $client = new \GuzzleHttp\Client();
+        $res = $client->post( $url, [
+            'headers' =>[
+                'authorization' => $this->authHeader,
+                'cache-control' => 'no-cache',
+                'Content-Type' => 'application/json'
+            ]
+        ]);
+        $body = $res->getBody();
+        $arr_body = json_decode($body);
+        return $arr_body;
+    }
 
 
 
