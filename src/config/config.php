@@ -30,6 +30,7 @@ return [
         'merchantKey'  => env('INDIPAY_MERCHANT_KEY', ''),
         'salt'  => env('INDIPAY_SALT', ''),
         'workingKey' => env('INDIPAY_WORKING_KEY', ''),
+        'authHeader' => env('INDIPAY_AUTH_HEADER', ''),
 
         // Should be route address for url() function
         'successUrl' => env('INDIPAY_SUCCESS_URL', 'indipay/response'),
