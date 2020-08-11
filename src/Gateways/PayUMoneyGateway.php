@@ -6,6 +6,10 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\View;
 use Softon\Indipay\Exceptions\IndipayParametersMissingException;
 
+/**
+ * Class PayUMoneyGateway
+ * @package Softon\Indipay\Gateways
+ */
 class PayUMoneyGateway implements PaymentGatewayInterface {
 
     protected $parameters = array();
@@ -15,13 +19,20 @@ class PayUMoneyGateway implements PaymentGatewayInterface {
     protected $hash = '';
     protected $liveEndPoint = 'https://secure.payu.in/_payment';
     protected $testEndPoint = 'https://sandboxsecure.payu.in/_payment';
+    protected $liveEndPointForVerifyPayment = 'https://www.payumoney.com/payment/op/getPaymentResponse';
+    protected $testEndPointForVerifyPayment = 'https://www.payumoney.com/sandbox/payment/op/getPaymentResponse';
+    protected $authHeader = '';
     public $response = '';
 
+    /**
+     * PayUMoneyGateway constructor.
+     */
     function __construct()
     {
         $this->merchantKey = Config::get('indipay.payumoney.merchantKey');
         $this->salt = Config::get('indipay.payumoney.salt');
         $this->testMode = Config::get('indipay.testMode');
+        $this->authHeader = Config::get('indipay.payumoney.authHeader');
 
         $this->parameters['key'] = $this->merchantKey;
         $this->parameters['txnid'] = $this->generateTransactionID();
@@ -33,6 +44,14 @@ class PayUMoneyGateway implements PaymentGatewayInterface {
     public function getEndPoint()
     {
         return $this->testMode?$this->testEndPoint:$this->liveEndPoint;
+    }
+
+    /**
+     * @return string
+     */
+    public function getEndPointForPaymentVerification()
+    {
+        return $this->testMode?$this->testEndPointForVerifyPayment:$this->liveEndPointForVerifyPayment;
     }
 
     public function request($parameters)
@@ -149,13 +168,17 @@ class PayUMoneyGateway implements PaymentGatewayInterface {
         return strtolower(hash('sha512', $hash_string));
     }
 
-
-
     public function generateTransactionID()
     {
         return substr(hash('sha256', mt_rand() . microtime()), 0, 20);
     }
-    
+
+    public function getTxnId()
+    {
+        return $this->parameters['txnid'];
+    }
+
+
     /**
      * @param array $parameters
      * @return false|mixed
@@ -178,8 +201,4 @@ class PayUMoneyGateway implements PaymentGatewayInterface {
         $arr_body = json_decode($body);
         return $arr_body;
     }
-
-
-
-
 }
